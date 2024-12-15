@@ -25,7 +25,8 @@ jobs:
     steps:
     - name: Install build dependencies
       run: |
-        dnf install -y curl git tar gzip make gcc || yum install -y curl git tar gzip make gcc
+        dnf install -y curl git tar gzip make gcc 
+        echo "yum install -y curl git tar gzip make gcc"
 
     - name: Determine version
       run: |
