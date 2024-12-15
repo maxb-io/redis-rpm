@@ -2,8 +2,10 @@ name: Build and Upload RPM Packages
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - release/**
+      - rc/8.0
+    workflow_dispatch:
 
 jobs:
   build-rpms:
@@ -24,19 +26,25 @@ jobs:
       run: |
         dnf install -y curl git tar gzip make gcc || yum install -y curl git tar gzip make gcc
 
-    - name: Download Project AAA Source Code
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Determine version
       run: |
-        REPO="your-org/project-aaa"
-        LATEST_RELEASE=$(curl -s https://api.github.com/repos/$REPO/releases/latest || { echo "Error fetching release info"; exit 1; })
-        TARBALL_URL=$(echo "$LATEST_RELEASE" | grep -oP '(?<="tarball_url": ")[^"]+')
-        [ -n "$TARBALL_URL" ] || { echo "Error: No tarball URL found"; exit 1; }
+#          VERSION=$(head -1 debian/changelog | sed 's/^.*([0-9]*:*\([0-9.]*\)-.*$/\1/')
+          VERSION="8.0-m01"   
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+    - name: Download Redis source
+      run: |
         
-        curl -L -o project-aaa.tar.gz "$TARBALL_URL"
-        
+        curl --silent -L "https://github.com/redis/redis/archive/${VERSION}.tar.gz" -o redis_${VERSION}.orig.tar.gz
         mkdir -p source
-        tar -xzf project-aaa.tar.gz -C source --strip-components=1
+        tar -xzf redis_${VERSION}.orig.tar.gz -C source --strip-components=1
+
+#        REPO="your-org/project-aaa"
+#        LATEST_RELEASE=$(curl -s https://api.github.com/repos/$REPO/releases/latest || { echo "Error fetching release info"; exit 1; })
+#        TARBALL_URL=$(echo "$LATEST_RELEASE" | grep -oP '(?<="tarball_url": ")[^"]+')
+#        [ -n "$TARBALL_URL" ] || { echo "Error: No tarball URL found"; exit 1; }
+#
+#        curl -L -o project-aaa.tar.gz "$TARBALL_URL"
 
     - name: Set up Go
       uses: actions/setup-go@v4
@@ -87,3 +95,17 @@ jobs:
       with:
         name: ${{ matrix.platform }}-rpms
         path: dist/${{ matrix.platform }}/$VERSION/
+
+    - name: Upload RPMs to S3
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: |
+        BUCKET_NAME="temp-test-redis-rpm"
+        REGION="us-east-2"
+        VERSION="${{ github.ref_name }}"
+        PLATFORM="${{ matrix.platform }}"
+        s3cmd --access_key=${AWS_ACCESS_KEY_ID} \
+              --secret_key=${AWS_SECRET_ACCESS_KEY} \
+              put -P dist/$PLATFORM/$VERSION/*.rpm \
+              s3://$BUCKET_NAME/rpms/$PLATFORM/$VERSION/
