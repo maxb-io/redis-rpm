@@ -30,7 +30,7 @@ jobs:
 
     - name: Install build dependencies
       run: |
-        if [ "${{ matrix.platform }}" == "rhel8" ] || [ "${{ matrix.platform }}" == "rhel9" ]; then
+        if [ "${{ matrix.platform.name }}" == "rhel8" ] || [ "${{ matrix.platform.name }}" == "rhel9" ]; then
           echo "curl git tar gzip make gcc" | xargs -I {} sh -c 'rpm -q {} || dnf install -y --allowerasing {}'
         else
           yum install -y curl git tar gzip make gcc
