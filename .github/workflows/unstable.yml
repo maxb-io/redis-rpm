@@ -1,0 +1,115 @@
+name: Build and Upload RPM Packages
+
+on:
+  push:
+    branches:
+      - release/**
+      - rc/8.0
+    workflow_dispatch:
+
+
+jobs:
+  build-rpms:
+    name: Build RPM Packages
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform:
+          - rhel8
+          - rhel9
+          - amazonlinux2
+
+    container:
+      image: ${{ matrix.platform == 'amazonlinux2' && 'amazonlinux:2' || 'redhat/ubi' + matrix.platform[-1] }}
+
+    steps:
+    - name: Install build dependencies
+      run: |
+        if [ "${{ matrix.platform }}" == "rhel8" ] || [ "${{ matrix.platform }}" == "rhel9" ]; then
+          dnf install -y curl git tar gzip make gcc
+        else
+          yum install -y curl git tar gzip make gcc
+        fi
+    - name: Determine version
+      run: |
+          echo "VERSION=$(head -1 debian/changelog | sed 's/^.*([0-9]*:*\([0-9.]*\)-.*$/\1/')"
+          VERSION="8.0-m01"   
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+    - name: Download Redis source
+      run: |
+        
+        curl --silent -L "https://github.com/redis/redis/archive/${VERSION}.tar.gz" -o redis_${VERSION}.orig.tar.gz
+        mkdir -p source
+        tar -xzf redis_${VERSION}.orig.tar.gz -C source --strip-components=1
+
+#        REPO="your-org/project-aaa"
+#        LATEST_RELEASE=$(curl -s https://api.github.com/repos/$REPO/releases/latest || { echo "Error fetching release info"; exit 1; })
+#        TARBALL_URL=$(echo "$LATEST_RELEASE" | grep -oP '(?<="tarball_url": ")[^"]+')
+#        [ -n "$TARBALL_URL" ] || { echo "Error: No tarball URL found"; exit 1; }
+#
+#        curl -L -o project-aaa.tar.gz "$TARBALL_URL"
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+
+    - name: Build Project
+      run: |
+        cd source
+        make build
+
+    - name: Install nfpm
+      run: |
+        go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
+
+    - name: Prepare nfpm configuration
+      run: |
+        VERSION="${{ github.ref_name }}"
+        cat > nfpm.yaml << EOF
+        name: "project-aaa"
+        arch: "x86_64"
+        platform: "${{ matrix.platform }}"
+        version: "$VERSION"
+        section: "default"
+        priority: "extra"
+        maintainer: "Your Name <your.email@example.com>"
+        description: "Project AAA RPM Package"
+        homepage: "${{ github.server_url }}/${{ github.repository }}"
+        
+        contents:
+          - src: ./source/build/*
+            dst: /usr/bin/
+            file_mode: 0755
+        
+        rpm:
+          summary: "Project AAA"
+          group: "Application/System"
+          compression: "gzip"
+        EOF
+
+    - name: Build RPM Package
+      run: |
+        mkdir -p dist/${{ matrix.platform }}/$VERSION
+        nfpm package --packager rpm --target dist/${{ matrix.platform }}/$VERSION/
+
+    - name: Upload RPM Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.platform }}-rpms
+        path: dist/${{ matrix.platform }}/$VERSION/
+
+    - name: Upload RPMs to S3
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: |
+        BUCKET_NAME="temp-test-redis-rpm"
+        REGION="us-east-2"
+        VERSION="${{ github.ref_name }}"
+        PLATFORM="${{ matrix.platform }}"
+        s3cmd --access_key=${AWS_ACCESS_KEY_ID} \
+              --secret_key=${AWS_SECRET_ACCESS_KEY} \
+              put -P dist/$PLATFORM/$VERSION/*.rpm \
+              s3://$BUCKET_NAME/rpms/$PLATFORM/$VERSION/
