@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: [rhel8:redhat/ubi8, rhel9:redhat/ubi9, amazonlinux2:amazonlinux:2]
+        platform: ['rhel8:redhat/ubi8', 'rhel9:redhat/ubi9', 'amazonlinux2:amazonlinux:2']
 
     container:
       image: ${{ matrix.platform.split(':')[1] }}
