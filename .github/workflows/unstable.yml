@@ -20,7 +20,7 @@ jobs:
           - amazonlinux2
 
     container:
-      image: ${{ matrix.platform == 'amazonlinux2' && 'amazonlinux:2' || 'redhat/ubi' + matrix.platform[-1] }}
+      image: ${{ matrix.platform == 'amazonlinux2' && 'amazonlinux:2' || format('redhat/ubi{0}', matrix.platform[-1]) }}
 
     steps:
     - name: Install build dependencies
