@@ -43,7 +43,7 @@ jobs:
 
     - name: Download Redis source
       run: |
-        
+        echo "Downloading Redis version: ${VERSION}"
         curl --silent -L "https://github.com/redis/redis/archive/${VERSION}.tar.gz" -o redis_${VERSION}.orig.tar.gz
         mkdir -p source
         tar -xzf redis_${VERSION}.orig.tar.gz -C source --strip-components=1
