@@ -26,6 +26,12 @@ jobs:
       image: ${{ matrix.platform.image }}
 
     steps:
+    - name: Debug Selected Docker Image
+      run: echo "Selected Docker Image:" ${{ matrix.platform.image }}
+
+    - name: Confirm Docker Environment
+      run: cat /etc/os-release
+
     - name: Install build dependencies
       run: |
         if [ "${{ matrix.platform }}" == "rhel8" ] || [ "${{ matrix.platform }}" == "rhel9" ]; then
