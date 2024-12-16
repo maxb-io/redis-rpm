@@ -14,10 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: ['rhel8:redhat/ubi8', 'rhel9:redhat/ubi9', 'amazonlinux2:amazonlinux:2']
-
+        platform: 
+          - {name: 'rhel8', image: 'redhat/ubi8'}
+          - {name: 'rhel9', image: 'redhat/ubi9'}
+          - {name: 'amazonlinux2', image: 'amazonlinux:2'}
     container:
-      image: ${{ matrix.platform.split(':')[1] }}
+      image: ${{ matrix.platform.image }}
 
     steps:
     - name: Debug Selected Docker Image
