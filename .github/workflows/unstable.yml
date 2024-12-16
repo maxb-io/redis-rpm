@@ -28,7 +28,7 @@ jobs:
         if [ "${{ matrix.platform }}" == "rhel8" ] || [ "${{ matrix.platform }}" == "rhel9" ]; then
           id
           which dnf
-          yum install -y curl git tar gzip make gcc
+          sudo yum install -y curl git tar gzip make gcc
         else
           yum install -y curl git tar gzip make gcc
         fi
