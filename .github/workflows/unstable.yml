@@ -1,0 +1,32 @@
+name: Build and Upload RPM Packages
+
+on:
+  push:
+    branches:
+      - release/**
+      - rc/8.0 
+  workflow_dispatch:
+
+
+jobs:
+  build-rpms:
+    name: Build RPM Packages
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform:
+          - rhel8
+          - rhel9
+          - amazonlinux2
+
+    container:
+      image: ${{ matrix.platform == 'amazonlinux2' && 'amazonlinux:2' || 'redhat/ubi' + matrix.platform[-1] }}
+
+    steps:
+    - name: Install build dependencies
+      run: |
+        if [ "${{ matrix.platform }}" == "rhel8" ] || [ "${{ matrix.platform }}" == "rhel9" ]; then
+          dnf install -y curl git tar gzip make gcc
+        else
+          yum install -y curl git tar gzip make gcc
+        fi
