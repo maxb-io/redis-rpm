@@ -1,0 +1,20 @@
+[centos-stream-baseos]
+name=CentOS Stream 8 - BaseOS
+baseurl=http://mirror.stream.centos.org/8-stream/BaseOS/$basearch/os/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.centos.org/keys/RPM-GPG-KEY-CentOS-Official
+
+[centos-stream-appstream]
+name=CentOS Stream 8 - AppStream
+baseurl=http://mirror.stream.centos.org/8-stream/AppStream/$basearch/os/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.centos.org/keys/RPM-GPG-KEY-CentOS-Official
+
+[centos-stream-extras]
+name=CentOS Stream 8 - Extras
+baseurl=http://mirror.stream.centos.org/8-stream/extras/$basearch/os/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.centos.org/keys/RPM-GPG-KEY-CentOS-Official
