@@ -1,13 +1,13 @@
 [centos-stream-baseos]
 name=CentOS Stream 9 - BaseOS
-baseurl=http://mirror.stream.centos.org/9-stream/BaseOS/\$basearch/os/
+baseurl=http://mirror.stream.centos.org/9-stream/BaseOS/$basearch/os/
 gpgcheck=1
 enabled=1
 gpgkey=https://www.centos.org/keys/RPM-GPG-KEY-CentOS-Official
 
 [centos-stream-appstream]
 name=CentOS Stream 9 - AppStream
-baseurl=http://mirror.stream.centos.org/9-stream/AppStream/\$basearch/os/
+baseurl=http://mirror.stream.centos.org/9-stream/AppStream/$basearch/os/
 gpgcheck=1
 enabled=1
 gpgkey=https://www.centos.org/keys/RPM-GPG-KEY-CentOS-Official
