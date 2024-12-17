@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: 
+        platform:
           - {name: 'rhel8', image: 'redhat/ubi8'}
           - {name: 'rhel9', image: 'redhat/ubi9'}
           - {name: 'amazonlinux2', image: 'amazonlinux:2'}
@@ -31,24 +31,48 @@ jobs:
     - name: Install build dependencies
       run: |
         if [ "${{ matrix.platform.name }}" == "rhel8" ] || [ "${{ matrix.platform.name }}" == "rhel9" ]; then
-          dnf install -y --quiet curl git tar gzip make gcc --allowerasing
+          dnf install -y --quiet curl git tar gzip make gcc g++ cmake python3 python3-pip python3-venv python3-devel unzip rsync clang automake libtool jq --allowerasing
+          
+          tee /etc/yum.repos.d/centos-stream-9.repo > /dev/null << EOF
+          [centos-stream-baseos]
+          name=CentOS Stream 9 - BaseOS
+          baseurl=http://mirror.stream.centos.org/9-stream/BaseOS/\$basearch/os/
+          gpgcheck=1
+          enabled=1
+          gpgkey=https://www.centos.org/keys/RPM-GPG-KEY-CentOS-Official
+          
+          [centos-stream-appstream]
+          name=CentOS Stream 9 - AppStream
+          baseurl=http://mirror.stream.centos.org/9-stream/AppStream/\$basearch/os/
+          gpgcheck=1
+          enabled=1
+          gpgkey=https://www.centos.org/keys/RPM-GPG-KEY-CentOS-Official
+          EOF
+          
+          dnf clean all
+          dnf makecache
+          dnf install boost automake --enablerepo=centos-stream-baseos --enablerepo=centos-stream-appstream       
         else
           yum install -y curl git tar gzip make gcc
         fi
+    - name: Install dependencies
+      run: |
+          if [ "${{ matrix.platform.name }}" == "rhel8" ] || [ "${{ matrix.platform.name }}" == "rhel9" ]; then
+            dnf install -y --quiet rpm-build
+          else
+            yum install -y rpm-build
+          fi
     - name: Determine version
       run: |
           #echo "VERSION=$(head -1 debian/changelog | sed 's/^.*([0-9]*:*\([0-9.]*\)-.*$/\1/')"
           VERSION="8.0-m01"   
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
-
     - name: Download Redis source
       run: |
-        echo "Downloading Redis version: ${VERSION}"
-        echo "curl --silent -L "https://github.com/redis/redis/archive/${VERSION}.tar.gz" -o redis_${VERSION}.orig.tar.gz"
-        curl -L "https://github.com/redis/redis/archive/${VERSION}.tar.gz" -o redis_${VERSION}.orig.tar.gz
+        
+        curl --silent -L "https://github.com/redis/redis/archive/${VERSION}.tar.gz" -o redis_${VERSION}.orig.tar.gz
         mkdir -p source
         tar -xzf redis_${VERSION}.orig.tar.gz -C source --strip-components=1
-
 #        REPO="your-org/project-aaa"
 #        LATEST_RELEASE=$(curl -s https://api.github.com/repos/$REPO/releases/latest || { echo "Error fetching release info"; exit 1; })
 #        TARBALL_URL=$(echo "$LATEST_RELEASE" | grep -oP '(?<="tarball_url": ")[^"]+')
@@ -64,12 +88,10 @@ jobs:
     - name: Build Project
       run: |
         cd source
-        make build
-
+        BUILD_WITH_MODULES=yes make REDIS_CFLAGS='-Werror -DREDIS_TEST'   
     - name: Install nfpm
       run: |
         go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
-
     - name: Prepare nfpm configuration
       run: |
         VERSION="${{ github.ref_name }}"
@@ -94,12 +116,10 @@ jobs:
           group: "Application/System"
           compression: "gzip"
         EOF
-
     - name: Build RPM Package
       run: |
         mkdir -p dist/${{ matrix.platform }}/$VERSION
         nfpm package --packager rpm --target dist/${{ matrix.platform }}/$VERSION/
-
     - name: Upload RPM Artifacts
       uses: actions/upload-artifact@v4
       with:
