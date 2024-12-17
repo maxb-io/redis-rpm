@@ -47,7 +47,7 @@ jobs:
           gpgcheck=1
           enabled=1
           gpgkey=https://www.centos.org/keys/RPM-GPG-KEY-CentOS-Official
-          EOF
+        EOF
           
           dnf clean all
           dnf makecache
