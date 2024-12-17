@@ -33,7 +33,7 @@ jobs:
     - name: Install build dependencies
       run: |
         if [ "${{ matrix.platform.name }}" == "rhel8" ] || [ "${{ matrix.platform.name }}" == "rhel9" ]; then
-          dnf install -y --quiet curl git tar gzip make gcc g++ cmake python3 python3-pip python3-devel unzip rsync clang automake libtool jq --allowerasing
+          dnf install -y --quiet curl git tar gzip make gcc g++ cmake python3 python3-pip python3-devel unzip rsync clang automake libtool openssl-devel compat-openssl11 jq --allowerasing
           
           cp etc/centos-stream-9.repo /etc/yum.repos.d/centos-stream-9.repo
           dnf clean all
