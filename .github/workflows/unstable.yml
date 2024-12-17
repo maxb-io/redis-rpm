@@ -38,17 +38,11 @@ jobs:
           cp etc/centos-stream-9.repo /etc/yum.repos.d/centos-stream-9.repo11 
           dnf clean all
           dnf makecache
-          dnf install boost automake --enablerepo=centos-stream-baseos --enablerepo=centos-stream-appstream       
+          dnf install -y boost automake --enablerepo=centos-stream-baseos --enablerepo=centos-stream-appstream       
         else
           yum install -y curl git tar gzip make gcc
         fi
-    - name: Install dependencies
-      run: |
-          if [ "${{ matrix.platform.name }}" == "rhel8" ] || [ "${{ matrix.platform.name }}" == "rhel9" ]; then
-            dnf install -y --quiet rpm-build
-          else
-            yum install -y rpm-build
-          fi
+
     - name: Determine version
       run: |
           #echo "VERSION=$(head -1 debian/changelog | sed 's/^.*([0-9]*:*\([0-9.]*\)-.*$/\1/')"
