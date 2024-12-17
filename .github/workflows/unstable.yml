@@ -15,9 +15,9 @@ jobs:
     strategy:
       matrix:
         platform:
-          - {name: 'rhel8', image: 'redhat/ubi8'}
+       #   - {name: 'rhel8', image: 'redhat/ubi8'}
           - {name: 'rhel9', image: 'redhat/ubi9'}
-          - {name: 'amazonlinux2', image: 'amazonlinux:2'}
+       #   - {name: 'amazonlinux2', image: 'amazonlinux:2'}
     container:
       image: ${{ matrix.platform.image }}
 
