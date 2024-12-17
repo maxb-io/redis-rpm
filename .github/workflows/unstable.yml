@@ -41,6 +41,9 @@ jobs:
           cat /etc/yum.repos.d/centos-stream-9.repo11 
           dnf clean all
           dnf makecache
+          dnf repolist
+          dnf config-manager --set-enabled centos-stream-baseos centos-stream-appstream
+          dnf repolist
           dnf install -y boost automake --enablerepo=centos-stream-baseos --enablerepo=centos-stream-appstream       
         else
           yum install -y curl git tar gzip make gcc
