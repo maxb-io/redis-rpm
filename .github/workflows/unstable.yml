@@ -36,14 +36,8 @@ jobs:
           dnf install -y --quiet curl git tar gzip make gcc g++ cmake python3 python3-pip python3-devel unzip rsync clang automake libtool jq --allowerasing
           
           cp etc/centos-stream-9.repo /etc/yum.repos.d/centos-stream-9.repo
-          ls -l 
-          ls -l etc
-          cat /etc/yum.repos.d/centos-stream-9.repo11 
           dnf clean all
           dnf makecache
-          dnf repolist
-          dnf config-manager --set-enabled centos-stream-baseos centos-stream-appstream
-          dnf repolist
           dnf install -y boost automake --enablerepo=centos-stream-baseos --enablerepo=centos-stream-appstream       
         else
           yum install -y curl git tar gzip make gcc
