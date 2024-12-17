@@ -28,27 +28,14 @@ jobs:
     - name: Confirm Docker Environment
       run: cat /etc/os-release
 
+    - uses: actions/checkout@v4
+
     - name: Install build dependencies
       run: |
         if [ "${{ matrix.platform.name }}" == "rhel8" ] || [ "${{ matrix.platform.name }}" == "rhel9" ]; then
           dnf install -y --quiet curl git tar gzip make gcc g++ cmake python3 python3-pip python3-venv python3-devel unzip rsync clang automake libtool jq --allowerasing
           
-        tee /etc/yum.repos.d/centos-stream-9.repo11 > /dev/null << \'EOF\'
-        [centos-stream-baseos]
-        name=CentOS Stream 9 - BaseOS
-        baseurl=http://mirror.stream.centos.org/9-stream/BaseOS/\$basearch/os/
-        gpgcheck=1
-        enabled=1
-        gpgkey=https://www.centos.org/keys/RPM-GPG-KEY-CentOS-Official
-        
-        [centos-stream-appstream]
-        name=CentOS Stream 9 - AppStream
-        baseurl=http://mirror.stream.centos.org/9-stream/AppStream/\$basearch/os/
-        gpgcheck=1
-        enabled=1
-        gpgkey=https://www.centos.org/keys/RPM-GPG-KEY-CentOS-Official
-        EOF
-          
+          cp etc/centos-stream-9.repo /etc/yum.repos.d/centos-stream-9.repo11 
           dnf clean all
           dnf makecache
           dnf install boost automake --enablerepo=centos-stream-baseos --enablerepo=centos-stream-appstream       
