@@ -15,8 +15,8 @@ jobs:
     strategy:
       matrix:
         platform:
-       #   - {name: 'rhel8', image: 'redhat/ubi8'}
-          - {name: 'rhel9', image: 'redhat/ubi9'}
+          - {name: 'rhel8', image: 'redhat/ubi8'}
+       #   - {name: 'rhel9', image: 'redhat/ubi9'}
        #   - {name: 'amazonlinux2', image: 'amazonlinux:2'}
     container:
       image: ${{ matrix.platform.image }}
@@ -32,10 +32,17 @@ jobs:
 
     - name: Install build dependencies
       run: |
-        if [ "${{ matrix.platform.name }}" == "rhel8" ] || [ "${{ matrix.platform.name }}" == "rhel9" ]; then
+        if [ "${{ matrix.platform.name }}" == "rhel9" ]; then
           dnf install -y --quiet curl git tar gzip make gcc gcc-toolset-13-gcc gcc-toolset-13-gcc-c++ cmake python3 python3-pip python3-devel unzip rsync clang automake libtool openssl-devel jq --allowerasing
           
           cp etc/centos-stream-9.repo /etc/yum.repos.d/centos-stream-9.repo
+          dnf clean all
+          dnf makecache
+          dnf install -y boost automake --enablerepo=centos-stream-baseos --enablerepo=centos-stream-appstream
+         elif [ "${{ matrix.platform.name }}" == "rhel8" ]; then
+          dnf install -y --quiet curl git tar gzip make gcc gcc-toolset-13-gcc gcc-toolset-13-gcc-c++ gcc-toolset-13-libatomic-devel cmake python3 python3-pip python3-devel unzip rsync clang automake libtool openssl-devel bzip2-devel libffi-devel zlib-devel xz which python3.11-devel jq --allowerasing
+          
+          cp etc/centos-stream-8.repo /etc/yum.repos.d/centos-stream-8.repo
           dnf clean all
           dnf makecache
           dnf install -y boost automake --enablerepo=centos-stream-baseos --enablerepo=centos-stream-appstream       
