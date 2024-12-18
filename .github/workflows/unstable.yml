@@ -54,7 +54,7 @@ jobs:
           gcc-toolset-13-libatomic-devel gcc-toolset-13-libatomic-devel cmake python3 python3-pip python3-devel \
           unzip rsync clang automake  libtool openssl openssl-devel bzip2-devel libffi-devel zlib-devel xz which \
           python3.11-devel jq --allowerasing
-          pip install dataclasses
+          pip3 install dataclasses
           
           cp /opt/rh/gcc-toolset-13/enable /etc/profile.d/gcc-toolset-13.sh
           source /etc/profile.d/gcc-toolset-13.sh   
