@@ -112,7 +112,8 @@ jobs:
         contents:
           - src: ./source/build/*
             dst: /usr/bin/
-            mode: "0644"
+            file_info:
+              mode: "0644"
         
         rpm:
           summary: "Project AAA"
