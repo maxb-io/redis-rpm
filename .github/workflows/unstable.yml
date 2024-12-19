@@ -112,7 +112,7 @@ jobs:
         contents:
           - src: ./source/build/*
             dst: /usr/bin/
-            file_mode: 0755
+            permissions: "0644"
         
         rpm:
           summary: "Project AAA"
