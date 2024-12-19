@@ -66,12 +66,14 @@ jobs:
     - name: Determine version
       run: |
           #echo "VERSION=$(head -1 debian/changelog | sed 's/^.*([0-9]*:*\([0-9.]*\)-.*$/\1/')"
-          VERSION="8.0-m02"   
+          #VERSION="8.0-m02"   
+          VERSION="8-mod"   
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
     - name: Download Redis source
       run: |
-        
-        curl --silent -L "https://github.com/redis/redis/archive/${VERSION}.tar.gz" -o redis_${VERSION}.orig.tar.gz
+
+        curl --silent -L "https://github.com/maxb-io/redis/archive/${VERSION}.tar.gz" -o redis_${VERSION}.orig.tar.gz
+        #curl --silent -L "https://github.com/redis/redis/archive/${VERSION}.tar.gz" -o redis_${VERSION}.orig.tar.gz
         mkdir -p source
         tar -xzf redis_${VERSION}.orig.tar.gz -C source --strip-components=1
 #        REPO="your-org/project-aaa"
