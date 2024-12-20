@@ -61,7 +61,6 @@ jobs:
           source /etc/profile.d/gcc-toolset-13.sh 
           echo "Show gcc version"
           gcc --version
-          whcih gcc
         else
           yum install -y curl git tar gzip make gcc
         fi
