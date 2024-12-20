@@ -58,7 +58,10 @@ jobs:
           bash install/install_cmake.sh
           
           cp /opt/rh/gcc-toolset-13/enable /etc/profile.d/gcc-toolset-13.sh
-          source /etc/profile.d/gcc-toolset-13.sh   
+          source /etc/profile.d/gcc-toolset-13.sh 
+          echo "Show gcc version"
+          gcc --version
+          whcih gcc
         else
           yum install -y curl git tar gzip make gcc
         fi
@@ -91,7 +94,10 @@ jobs:
     - name: Build Project
       run: |
         cd source
-        BUILD_WITH_MODULES=yes make REDIS_CFLAGS='-Werror -DREDIS_TEST'   
+        BUILD_WITH_MODULES=yes make REDIS_CFLAGS='-Werror -DREDIS_TEST' BUILD_TLS=yes
+        PREFIX=./build/usr make BUILD_TLS=yes install
+        echo "list artifacrs"
+        ls -lR ./build/
     - name: Install nfpm
       run: |
         go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
@@ -110,7 +116,7 @@ jobs:
         homepage: "${{ github.server_url }}/${{ github.repository }}"
         
         contents:
-          - src: ./source/src/redis*
+          - src: ./build/usr/*
             dst: /usr/bin/
         
         rpm:
